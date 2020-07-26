@@ -59,7 +59,10 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Center(
         child: ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: 200), child: SelectWheel()),
+            constraints: BoxConstraints(maxHeight: 200),
+            child: SelectWheel(
+              initialValue: 1,
+            )),
       ),
     );
   }

@@ -83,6 +83,14 @@ class _SelectWheelState extends State<SelectWheel> {
 
   int value = 0;
 
+  _listener() {
+    int newValue = (_scrollController.position.pixels / 35).round();
+    if ((newValue >= 0 || widget.negativeValues) && newValue != value) {
+      HapticFeedback.lightImpact();
+      widget.onValue(value = newValue);
+    }
+  }
+
   @override
   void initState() {
     value = widget.initialValue;
@@ -91,14 +99,15 @@ class _SelectWheelState extends State<SelectWheel> {
   }
 
   @override
+  void didUpdateWidget(SelectWheel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _scrollController.jumpTo(35.0 * widget.initialValue);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    _scrollController.addListener(() {
-      int newValue = (_scrollController.position.pixels / 35).round();
-      if ((newValue >= 0 || widget.negativeValues) && newValue != value) {
-        HapticFeedback.lightImpact();
-        widget.onValue(value = newValue);
-      }
-    });
+    _scrollController.removeListener(_listener);
+    _scrollController.addListener(_listener);
     return Stack(
       children: [
         Align(
