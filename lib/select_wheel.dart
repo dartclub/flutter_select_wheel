@@ -34,9 +34,9 @@ class _ItemScrollPhysics extends ScrollPhysics {
   double _getTargetPixels(
       ScrollPosition position, Tolerance tolerance, double velocity) {
     double item = _getItem(position);
-    if (velocity < -tolerance.velocity)
+    if (velocity < -tolerance.velocity) {
       item -= targetPixelsLimit;
-    else if (velocity > tolerance.velocity) item += targetPixelsLimit;
+    } else if (velocity > tolerance.velocity) item += targetPixelsLimit;
     return _getPixels(position, item.roundToDouble());
   }
 
