@@ -75,13 +75,17 @@ class SelectWheel extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _SelectWheelState createState() => _SelectWheelState();
+  _SelectWheelState createState() => _SelectWheelState(initialValue);
 }
 
 class _SelectWheelState extends State<SelectWheel> {
-  final ScrollController _scrollController = ScrollController();
-
+  final num initialValue;
+  final ScrollController _scrollController;
   int value = 0;
+
+  _SelectWheelState(this.initialValue)
+      : _scrollController =
+            ScrollController(initialScrollOffset: 35.0 * initialValue);
 
   _listener() {
     int newValue = (_scrollController.position.pixels / 35).round();
@@ -99,14 +103,7 @@ class _SelectWheelState extends State<SelectWheel> {
   }
 
   @override
-  void didUpdateWidget(SelectWheel oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _scrollController.jumpTo(35.0 * widget.initialValue);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    _scrollController.removeListener(_listener);
     _scrollController.addListener(_listener);
     return Stack(
       children: [
