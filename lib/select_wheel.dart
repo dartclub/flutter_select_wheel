@@ -101,6 +101,20 @@ class _SelectWheelState extends State<SelectWheel> {
     });
     return Stack(
       children: [
+        Align(
+          alignment: Alignment.center,
+          child: Container(
+            width: 120,
+            height: 35 * 1.5,
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              border: Border(
+                bottom: BorderSide(color: Colors.grey, width: 1),
+                top: BorderSide(color: Colors.grey, width: 1),
+              ),
+            ),
+          ),
+        ),
         ListWheelScrollView.useDelegate(
           physics: _ItemScrollPhysics(itemHeight: 35),
           itemExtent: 35,
@@ -123,20 +137,6 @@ class _SelectWheelState extends State<SelectWheel> {
                     : null,
           ),
         ),
-        Align(
-          alignment: Alignment.center,
-          child: Container(
-            width: 120,
-            height: 35 * 1.5,
-            decoration: BoxDecoration(
-              color: Colors.transparent,
-              border: Border(
-                bottom: BorderSide(color: Colors.grey, width: 1),
-                top: BorderSide(color: Colors.grey, width: 1),
-              ),
-            ),
-          ),
-        )
       ],
     );
   }
