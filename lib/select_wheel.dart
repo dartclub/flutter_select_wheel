@@ -1,5 +1,60 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+// ItemScrollPhysics from here: https://github.com/icemanbsi/flutter_time_picker_spinner/blob/f1345e0d06937238ca17be3cb636e54f4efcacd1/lib/flutter_time_picker_spinner.dart#L6
+class _ItemScrollPhysics extends ScrollPhysics {
+  final double itemHeight;
+  final double targetPixelsLimit;
+
+  const _ItemScrollPhysics({
+    ScrollPhysics parent,
+    @required this.itemHeight,
+    this.targetPixelsLimit = 3.0,
+  })  : assert(itemHeight != null && itemHeight > 0),
+        super(parent: parent);
+
+  @override
+  _ItemScrollPhysics applyTo(ScrollPhysics ancestor) {
+    return _ItemScrollPhysics(
+        parent: buildParent(ancestor), itemHeight: itemHeight);
+  }
+
+  double _getItem(ScrollPosition position) {
+    double maxScrollItem =
+        (position.maxScrollExtent / itemHeight).floorToDouble();
+    return min(max(0, position.pixels / itemHeight), maxScrollItem);
+  }
+
+  double _getPixels(ScrollPosition position, double item) {
+    return item * itemHeight;
+  }
+
+  double _getTargetPixels(
+      ScrollPosition position, Tolerance tolerance, double velocity) {
+    double item = _getItem(position);
+    if (velocity < -tolerance.velocity)
+      item -= targetPixelsLimit;
+    else if (velocity > tolerance.velocity) item += targetPixelsLimit;
+    return _getPixels(position, item.roundToDouble());
+  }
+
+  @override
+  Simulation createBallisticSimulation(
+      ScrollMetrics position, double velocity) {
+    Tolerance tolerance = this.tolerance;
+    final double target = _getTargetPixels(position, tolerance, velocity);
+    if (target != position.pixels) {
+      return ScrollSpringSimulation(spring, position.pixels, target, velocity,
+          tolerance: tolerance);
+    }
+    return null;
+  }
+
+  @override
+  bool get allowImplicitScrolling => false;
+}
 
 typedef OnValue = void Function(num value);
 
@@ -44,30 +99,45 @@ class _SelectWheelState extends State<SelectWheel> {
         widget.onValue(value = newValue);
       }
     });
-    return ListWheelScrollView.useDelegate(
-      itemExtent: 35,
-      magnification: 5,
-      clipBehavior: Clip.hardEdge,
-      diameterRatio: 2.5,
-      perspective: 0.008,
-      controller: _scrollController,
-      childDelegate: ListWheelChildBuilderDelegate(
-        builder: (BuildContext context, int i) =>
-            (widget.negativeValues || i >= 0)
-                ? Container(
-                    child: Center(
-                      child: Text('${i * widget.step}${widget.label}'),
-                    ),
-                    width: 120,
-                    height: 35,
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(width: 1, color: Colors.grey),
-                      ),
-                    ),
-                  )
-                : null,
-      ),
+    return Stack(
+      children: [
+        ListWheelScrollView.useDelegate(
+          physics: _ItemScrollPhysics(itemHeight: 35),
+          itemExtent: 35,
+          magnification: 1.5,
+          useMagnifier: true,
+          clipBehavior: Clip.antiAlias,
+          diameterRatio: 2.5,
+          perspective: 0.008,
+          controller: _scrollController,
+          childDelegate: ListWheelChildBuilderDelegate(
+            builder: (BuildContext context, int i) =>
+                (widget.negativeValues || i >= 0)
+                    ? Container(
+                        child: Center(
+                          child: Text('${i * widget.step}${widget.label}'),
+                        ),
+                        width: 120,
+                        height: 35,
+                      )
+                    : null,
+          ),
+        ),
+        Align(
+          alignment: Alignment.center,
+          child: Container(
+            width: 120,
+            height: 35 * 1.5,
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              border: Border(
+                bottom: BorderSide(color: Colors.grey, width: 1),
+                top: BorderSide(color: Colors.grey, width: 1),
+              ),
+            ),
+          ),
+        )
+      ],
     );
   }
 }
